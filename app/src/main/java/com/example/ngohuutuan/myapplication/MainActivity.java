@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.security.spec.ECField;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,13 +18,24 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.reflect.Array;
+import java.util.Scanner;
+import java.io.*;
+import java.nio.channels.*;
+
+import java.io.BufferedReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.io.InputStreamReader;
+import java.io.InputStream;
 
 
-
-
+import java.io.IOException;
+import android.content.res.AssetManager;
 
 
 public class MainActivity extends AppCompatActivity {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +57,12 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        test();
+        //test();
 
+        //boyerMoore();
+
+
+        searchString();
     }
 
     @Override
@@ -92,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
 
     public String[] finalConsonants = {"c", "p", "t", "m", "n", "ch", "ng", "nh"};
 
-    public String accentCharacters   = "àÀảẢãÃáÁạẠ ằẰẳẲẵẴắẮặẶ ầẦẩẨẫẪấẤậẬ èÈẻẺẽẼéÉẹẸ ềỀểỂễỄếẾệỆ ìÌỉỈĩĨíÍịỊ òÒỏỎõÕóÓọỌ ồỒổỔỗỖốỐộỘ ờỜởỞỡỠớỚợỢ ùÙủỦũŨúÚụỤ ừỪửỬữỮứỨựỰ ýÝ";
-    public String unAccentCharacters = "aAaAaAaAaA ăĂăĂăĂăĂăĂ âÂâÂâÂâÂâÂ eEeEeEeEeE êÊêÊêÊêÊêÊ iIiIiIiIiI oOoOoOoOoO ôÔôÔôÔôÔôÔ ơƠơƠơƠơƠơƠ uUuUuUuUuU ưƯưƯưƯưƯưƯ yY";
+    public String accentCharacters   = "àÀảẢãÃáÁạẠ ằẰẳẲẵẴắẮặẶ ầẦẩẨẫẪấẤậẬ èÈẻẺẽẼéÉẹẸ ềỀểỂễỄếẾệỆ ìÌỉỈĩĨíÍịỊ òÒỏỎõÕóÓọỌ ồỒổỔỗỖốỐộỘ ờỜởỞỡỠớỚợỢ ùÙủỦũŨúÚụỤ ừỪửỬữỮứỨựỰ yÝyỲyỶyỴyỶ";
+    public String unAccentCharacters = "aAaAaAaAaA ăĂăĂăĂăĂăĂ âÂâÂâÂâÂâÂ eEeEeEeEeE êÊêÊêÊêÊêÊ iIiIiIiIiI oOoOoOoOoO ôÔôÔôÔôÔôÔ ơƠơƠơƠơƠơƠ uUuUuUuUuU ưƯưƯưƯưƯưƯ yYyYyYyYyY";
 
     public String endingCharacterRegx = "^.+[\\?!.:;,\"\\)\\}\\]>']$";
 
@@ -109,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
     public String regxPercent = "\\d*\\%";
 
     public String regxMoneyOrNumber = "\\d*(\\$|vnđ)?";
+
+    public String other = "-";
 
     //public String regxSpecialChars = "([\\[~`!@#$%^&*()_+-=\\\\|;'/.,\":\\?><\\]{}])*";
 
@@ -126,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
          */
 
 
-        String testString = "ô Ngày ! ngohutuuan@gmail.com ntuan@@gmail.com@ +841649667039 01234567890 12/12/1029 10% 30$ we$ we3 &g ?s**a ấy con' tôis \"\" chỉ. mới ghé {thăm Huế} troyng [giây lát, thực]! ra chỉ mới quanh quẩn trong Đại Nội " +
+        String testString = "Ô kỳ ô Ngày ! ngohutuuan@gmail.com ntuan@@gmail.com@ +841649667039 01234567890 12/12/1029 10% 30$ we$ we3 &g ?s**a ấy con' tôis \"\" chỉ. mới ghé {thăm Huế} troyng [giây lát, thực]! ra chỉ mới quanh quẩn trong Đại Nội " +
                 "cùng các lăng tẩm chùa chqiền, và (trên bờ sông) Hương, nơi đầu cầu Trường Tiền. " +
                 "Nhưng tôi tin rằng không khí trong trẻo và đường phố Huế thật yên tĩnh vào bủôi sáng ngày mồng ba tết năm ấy, " +
                 "những tán lá phừợng? xasnh ở! đầu. cầu Trường Tiền... đã để! lại một? ấn stượng rất đẹp trong lòng của một cậu bé con.";
@@ -139,6 +158,13 @@ public class MainActivity extends AppCompatActivity {
 
 
         //String[] stringArray = testString.split(" ");
+
+
+
+
+
+
+
 
 
         ArrayList<String> stringArray = new ArrayList<String>(Arrays.asList(testString.split("\\s+")));
@@ -269,6 +295,9 @@ public class MainActivity extends AppCompatActivity {
                 } else if(string.matches(regxMoneyOrNumber)){
                     Log.d("DEBUG", "Reason: money or numbers");
                     return true;
+                } else if(string.matches(other)){
+                    Log.d("DEBUG", "Reason: dấu gạch ngang");
+                    return true;
                 }
 
 
@@ -346,6 +375,178 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public boolean testBaiKiemTra(){
+
+        Log.d("DEBUG", "test: |" + "hay ho       hihi ".trim().replaceAll("(\\s)+", " ") + "|");
+
+
+        String x = "thuyuh";
+
+        if(x.length() <= 1){
+            return false;
+        }
+
+        String vowels = "ueoai";
+
+        char start = x.charAt(0);
+        char end   = x.charAt(x.length() - 1);
+
+        boolean  startWithHIsCorrect = false;
+        boolean  endWithHIsCorrect = false;
+        boolean  middleHIsCorrect = false;
+
+
+        if(end == 'h'){
+
+            if(vowels.indexOf('s') != -1){
+
+            }
+
+        }
+
+        return true;
+    }
+
+
+    public void boyerMoore(){
+
+//        String text = "asdasdasd asdsd asdad ad as d asd a sd asdasdasd asdsd asdad ad as d asd a sd asdasdasd asdsd asdad ad as " +
+//                "d asd a sd asdasdasd asdsd asdad ad as d asd a sd asdasdasd asdsd asdad ad as d asd a sd ";
+//        String string = "asdasdasd";
+//
+//        int n = text.length();
+//        int m = string.length();
+//
+//        try{
+//
+//            File file = new File("1.txt");
+//            FileInputStream fileInputStream = new FileInputStream(file);
+//            FileChannel fileChannel = fileInputStream.getChannel();
+//
+//        } catch (Exception e){
+//            System.err.println(e.getMessage());
+//        }
+
+//        File file = new File("1.txt");
+//        Pattern pattern = Pattern.compile("Phạm Phi Vân");
+//        Scanner scanner = null;
+//
+//        try {
+//            scanner = new Scanner(file);
+//
+//            while (scanner.findWithinHorizon(pattern, 0) != null){
+//
+//
+//
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } finally {
+//            scanner.close();
+//        }
+
+
+        Log.d("DEBUG", "Start reading file line by line using BufferedReader");
+
+        InputStream inputStream = null;
+        BufferedReader reader = null;
+
+        String searchString = "Phạm Phi Vân";
+
+        try {
+
+
+            AssetManager assetManager = getAssets();
+
+            inputStream = assetManager.open("2.txt");
+
+            Log.d("DEBUG", "Start");
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            Log.d("DEBUG", "End");
+
+            String line = reader.readLine();
+            Log.d("DEBUG", "New line: \n" + line);
+
+            while(line != null){
+
+                Log.d("DEBUG", "New line: \n" + line);
+
+                int index = line.indexOf(searchString);
+                if(index != -1){
+                    Log.d("DEBUG", "Index: \n" + index);
+                }
+
+                line = reader.readLine();
+            }
+
+
+        } catch (FileNotFoundException ex) {
+
+            Log.d("DEBUG", ex.getMessage());
+
+        } catch (IOException ex) {
+
+            Log.d("DEBUG", ex.getMessage());
+
+        }
+
+    }
+
+
+    public void searchString(){
+
+        Log.d("DEBUG", "Search string");
+
+        FileInputStream fis = null;
+        BufferedReader reader = null;
+
+        try {
+            Log.d("DEBUG", "Search string");
+            fis = new FileInputStream("/2.txt");
+            Log.d("DEBUG", "Search string");
+            reader = new BufferedReader(new InputStreamReader(fis));
+            Log.d("DEBUG", "Reading File line by line using BufferedReader");
+
+            String line = reader.readLine();
+            while(line != null){
+                //System.out.println(line);
+                Log.d("DEBUG", "New Line: \n" + line);
+                line = reader.readLine();
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ex.getMessage());
+        } catch (IOException ex) {
+            Logger.getLogger(ex.getMessage());
+
+        } finally {
+            try {
+                //reader.close();
+                //fis.close();
+                if(reader != null)
+                    reader.close();
+                if(fis != null)
+                    fis.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ex.getMessage());
+            }
+        }
+
+    }
+
     /************************************ Nature Language Processing *******************************************/
 
 }
+
+
+
+
+
+
+
+
+
+
